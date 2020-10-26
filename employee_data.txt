@@ -1,0 +1,78 @@
+Usecase 1 query-
+show databases;
+use payroll_service;
+
+UseCase 2 Query- 
+create table employee_payroll(
+    ->    id INT NOT NULL AUTO_INCREMENT,
+    ->    name VARCHAR(100) NOT NULL,
+    ->    salary Double NOT NULL,
+    ->    start_date DATE,
+    ->    PRIMARY KEY (id)
+    -> );
+
+Usecase 3 Query-
+insert into employee_payroll (name, salary, start_date) values ('John', 10000.00, '2020-10-24'), ('Raj', 15000.00, '2020-10-30');
+
+UseCase 4 Query-
+select * from employee_payroll;
+
+Usecase 5 Query-
+select salary from employee_payroll
+    -> where name = 'John';
+
+select * from employee_payroll
+    -> where start_date between CAST('2020-01-01' as DATE) AND
+    -> DATE(NOW());
+
+Usecase 6 Query-
+Alter TABLE employee_payroll
+    -> ADD gender CHAR(1) After name;
+
+Update employee_payroll 
+    -> set gender = 'M' where name= 'John' or name = 'Raj';
+
+Usecase 7 Query-
+SUM- select sum(salary) from employee_payroll
+    -> where gender= 'M' group by gender;
+AVG- select avg(salary) from employee_payroll
+    -> where gender = 'F';
+Min- select min(salary) from employee_payroll
+    -> where gender = 'F';
+Max- select max(salary) from employee_payroll
+    -> where gender = 'M';
+Count- select gender, count(*) from employee_payroll
+    -> group by gender;
+
+alter table employee_payroll add column
+    -> phone varchar(10) default '1231231231' Not Null , add column address varchar(50) default 'address', add column department varchar(10) default 'Sales' Not Null;
+mysql> select * from employee_payroll;
++----+-------+--------+--------+------------+------------+---------+------------+
+| id | name  | gender | salary | start_date | phone      | address | department |
++----+-------+--------+--------+------------+------------+---------+------------+
+|  1 | John  | M      |  10000 | 2020-10-24 | 1231231231 | address | Sales      |
+|  2 | Raj   | M      |  15000 | 2020-10-30 | 1231231231 | address | Sales      |
+|  3 | Jane  | F      |  18000 | 2020-01-04 | 1231231231 | address | Sales      |
+|  4 | Ria   | F      |  20000 | 2020-02-24 | 1231231231 | address | Sales      |
+|  5 | Kunal | M      |  19000 | 2020-08-14 | 1231231231 | address | Sales      |
++----+-------+--------+--------+------------+------------+---------+------------+
+
+usecase 8 - 
+alter table employee_payroll
+add column basic_pay Double default '0' Not NULL,
+add column income_tax Double default '0' Not NULL,
+add column taxable_pay Double default '0' Not NULL,
+add column net_pay Double default '0' Not NULL;
+
+Usecase 9-
+insert into employee_payroll(name,gender,basic_pay,deductions,start_date,phone,address,department,income_tax,taxable_pay,net_pay)
+values ('Terissa','F','100000', '20000', '2020-01-10','9878987891','','Marketing','25000','60000','50000');
+
+select * from employee_payroll
+    -> where name = 'Terissa';
++----+---------+--------+-----------+------------+------------+------------+---------+------------+------------+-------------+---------+
+| id | name    | gender | basic_pay | deductions | start_date | phone      | address | department | income_tax | taxable_pay | net_pay |
++----+---------+--------+-----------+------------+------------+------------+---------+------------+------------+-------------+---------+
+|  6 | Terissa | F      |    100000 |      20000 | 2020-01-10 | 9878987891 |         | Marketing  |      25000 |       60000 |   50000 |
+|  7 | Terissa | F      |    100000 |          0 | 2019-06-10 | 9878987891 |         | Sales      |          0 |           0 |       0 |
++----+---------+--------+-----------+------------+------------+------------+---------+------------+------------+-------------+---------+

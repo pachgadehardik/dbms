@@ -1,0 +1,84 @@
+Usecase 1-create database addressbookservice;
+
+Usecase 2-create table address_book_table(
+    -> firstname varchar(100) NOT NULL,
+    -> lastname varchar(100) NOT NULL,
+    -> address varchar(100),
+    -> city varchar(50) NOT NULL,
+    -> state varchar(50) NOT NULL,
+    -> zip varchar(6),
+    -> phone varchar(10),
+    -> email varchar(50))
+    -> ;
+
+Usecase 3- 
+insert into address_book_table (firstname, lastname, address, city, state, zip, phone, email) values 
+('John','Doe','','Mumbai','Maharashtra','400068','9878987652','john@asd.com'), 
+('Rahul','Singh','','Surat','Gujarat','','',''),
+('Ria','parekh','','Bengaluru','Karnataka','','9878912652','Ria@asd.com');
+
+Usecase 4-(Updating record by name)
+update address_book_table
+    -> set zip = '400123' where firstname = 'Rahul';
+update address_book_table
+    -> set phone = '987602213' where firstname = 'Rahul' and lastname = 'Singh';
+
+Usecase 5-(Deleting contact using name)
+delete from address_book_table
+    -> where firstname = 'Rahul' and lastname = 'Singh';
+
+Usecase 6 -
+select * from address_book_table
+    -> where city Like 'Mumbai';
+select * from address_book_table
+    -> where state like 'Karnataka';
+
+Usecase 7-
+select city, count(city) from address_book_table
+    -> group by city;
+select state, count(state) from address_book_table
+    -> group by state;
+
+Usecase 8- 
+select firstname, lastname ,city from address_book_table
+    -> where city = 'Mumbai'
+    -> order by firstname,lastname;
++-----------+----------+--------+
+| firstname | lastname | city   |
++-----------+----------+--------+
+| aditya    | rai      | Mumbai |
+| John      | Deo      | Mumbai |
+| John      | Doe      | Mumbai |
++-----------+----------+--------+
+
+Usecase 9-
+alter table address_book_table
+    -> add type varchar(50) after lastname;
+update address_book_table
+    -> set type = 'friend' where name = 'aditya';
+update address_book_table
+    -> set type = 'friend' where lastname = 'Doe';
+update address_book_table
+    -> set type = 'professional' where firstname = 'Ria';
+
+select * from address_book_table;
++-----------+----------+--------------+---------+-----------+-------------+--------+------------+--------------+
+| firstname | lastname | type         | address | city      | state       | zip    | phone      | email        |
++-----------+----------+--------------+---------+-----------+-------------+--------+------------+--------------+
+| John      | Doe      | friend       |         | Mumbai    | Maharashtra | 400068 | 9878987652 | john@asd.com |
+| Ria       | parekh   | professional |         | Bengaluru | Karnataka   |        | 9878912652 | Ria@asd.com  |
+| John      | Deo      | family       |         | Mumbai    | Maharashtra | 400068 | 9878987652 | john@asd.com |
+| aditya    | rai      | friend       |         | Mumbai    | Maharashtra | 400068 | 9878987652 | john@asd.com |
++-----------+----------+--------------+---------+-----------+-------------+--------+------------+--------------+
+
+Usecase 10- 
+select type, count(*) as noOfType from address_book_table
+    -> group by type;
++--------------+----------+
+| type         | noOfType |
++--------------+----------+
+| friend       |        2 |
+| professional |        1 |
+| family       |        1 |
++--------------+----------+
+
