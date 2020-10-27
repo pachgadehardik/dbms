@@ -57,14 +57,13 @@ mysql> select * from employee_payroll;
 |  5 | Kunal | M      |  19000 | 2020-08-14 | 1231231231 | address | Sales      |
 +----+-------+--------+--------+------------+------------+---------+------------+
 
-usecase 8 - 
+usecase 9 - 
 alter table employee_payroll
 add column basic_pay Double default '0' Not NULL,
 add column income_tax Double default '0' Not NULL,
 add column taxable_pay Double default '0' Not NULL,
 add column net_pay Double default '0' Not NULL;
 
-Usecase 9-
 insert into employee_payroll(name,gender,basic_pay,deductions,start_date,phone,address,department,income_tax,taxable_pay,net_pay)
 values ('Terissa','F','100000', '20000', '2020-01-10','9878987891','','Marketing','25000','60000','50000');
 
@@ -76,3 +75,223 @@ select * from employee_payroll
 |  6 | Terissa | F      |    100000 |      20000 | 2020-01-10 | 9878987891 |         | Marketing  |      25000 |       60000 |   50000 |
 |  7 | Terissa | F      |    100000 |          0 | 2019-06-10 | 9878987891 |         | Sales      |          0 |           0 |       0 |
 +----+---------+--------+-----------+------------+------------+------------+---------+------------+------------+-------------+---------+
+
+
+--------------------------------------------------------------------------------
+Adding different tables for normalization
+1-Creating Employee Table
+insert into employee(name, phone, address, gender) values ('john doe', '9878988878', 'address1', 'M'),('jane doe', '1231231231','address2','F');
+
+mysql> select * from employee;
++--------+----------+------------+----------+--------+
+| emp_id | name     | phone      | address  | gender |
++--------+----------+------------+----------+--------+
+|      1 | john doe | 9878988878 | address1 | M      |
+|      2 | jane doe | 1231231231 | address2 | F      |
++--------+----------+------------+----------+--------+
+2 rows in set (0.00 sec)
+
+2- Creating Payroll Table
+create table payroll(
+    payroll_id int NOT NULL,
+    basic_pay Double default '0' not null,
+    income_tax Double default '0',
+    deduction Double default '0',
+    taxable_pay double default '0',
+    net_pay double default '0');
+
+insert into payroll(payroll_id,basic_pay,income_tax, deduction, taxable_pay,net_pay)
+values (1,'100000','0','0','0','0'), (2,'120000','0','0','0','0');
+
+mysql> select * from payroll;
++------------+-----------+------------+-----------+-------------+---------+
+| payroll_id | basic_pay | income_tax | deduction | taxable_pay | net_pay |
++------------+-----------+------------+-----------+-------------+---------+
+|          1 |    100000 |          0 |         0 |           0 |       0 |
+|          2 |    120000 |          0 |         0 |           0 |       0 |
++------------+-----------+------------+-----------+-------------+---------+
+2 rows in set (0.00 sec)
+
+3-Creating Department Table
+
+mysql> create table department(
+    -> dept_id int NOT NULL AUTO_INCREMENT,
+    -> dept_name varchar(50) NOT NULL,
+    -> PRIMARY KEY(dept_id));
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> desc department;
++-----------+-------------+------+-----+---------+----------------+
+| Field     | Type        | Null | Key | Default | Extra          |
++-----------+-------------+------+-----+---------+----------------+
+| dept_id   | int         | NO   | PRI | NULL    | auto_increment |
+| dept_name | varchar(50) | NO   |     | NULL    |                |
++-----------+-------------+------+-----+---------+----------------+
+2 rows in set (0.01 sec)
+
+mysql> insert into department (dept_name) values
+    -> ('Sales'), ('Marketing');
+Query OK, 2 rows affected (0.01 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> select * from department;
++---------+-----------+
+| dept_id | dept_name |
++---------+-----------+
+|       1 | Sales     |
+|       2 | Marketing |
++---------+-----------+
+2 rows in set (0.00 sec)
+
+
+4- create table employee_department(
+emp_id int NOT NULL,
+dept_id int not null,
+primary key(emp_id,dept_id),
+foreign key(emp_id) references employee(emp_id),
+foreign key(dept_id) references department(dept_id));
+	
+mysql> select * from employee;
++--------+----------+------------+----------+--------+
+| emp_id | name     | phone      | address  | gender |
++--------+----------+------------+----------+--------+
+|      1 | john doe | 9878988878 | address1 | M      |
+|      2 | jane doe | 1231231231 | address2 | F      |
+|      3 | Terissa  | 9878998789 | address  | F      |
+|      4 | Taylor   | 7678767676 | address  | M      |
++--------+----------+------------+----------+--------+
+4 rows in set (0.01 sec)
+
+mysql> select * from department;
++---------+-----------+
+| dept_id | dept_name |
++---------+-----------+
+|       1 | Sales     |
+|       2 | Marketing |
++---------+-----------+
+2 rows in set (0.02 sec)
+
+mysql> insert into employee_department(emp_id,dept_id) values
+    -> (1,1),(2,1),(3,1),(3,2),(4,2);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select * from employee_department;
++--------+---------+
+| emp_id | dept_id |
++--------+---------+
+|      1 |       1 |
+|      2 |       1 |
+|      3 |       1 |
+|      3 |       2 |
+|      4 |       2 |
++--------+---------+
+5 rows in set (0.00 sec)
+
+mysql> create table company(
+    -> comp_id int not null AUTO_INCREMENT,
+    -> emp_id int not null,
+    -> comp_name varchar(50) default 'capgemini',
+    -> Primary Key(comp_id),
+    -> Foreign Key(emp_id) references employee(emp_id));
+Query OK, 0 rows affected (0.10 sec)
+
+insert into company (comp_name) values ('capgemini'),('Altran'),('Igate');
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> select * from company;
++---------+-----------+
+| comp_id | comp_name |
++---------+-----------+
+|       1 | capgemini |
+|       2 | Altran    |
+|       3 | Igate     |
++---------+-----------+
+
+mysql> update employee
+    -> set comp_id =1;
+Query OK, 4 rows affected (0.03 sec)
+Rows matched: 4  Changed: 4  Warnings: 0
+
+mysql> select * from employee;
++--------+----------+------------+----------+--------+---------+
+| emp_id | name     | phone      | address  | gender | comp_id |
++--------+----------+------------+----------+--------+---------+
+|      1 | john doe | 9878988878 | address1 | M      |       1 |
+|      2 | jane doe | 1231231231 | address2 | F      |       1 |
+|      3 | Terissa  | 9878998789 | address  | F      |       1 |
+|      4 | Taylor   | 7678767676 | address  | M      |       1 |
++--------+----------+------------+----------+--------+---------+
+
+mysql> show tables;
++---------------------------+
+| Tables_in_payroll_service |
++---------------------------+
+| company                   |
+| department                |
+| employee                  |
+| employee_department       |
+| employee_payroll          |
+| payroll                   |
++---------------------------+
+6 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------
+Use case 11 -
+1-Sum of salaries by gender
+mysql> select e.gender,sum(p.basic_pay) from employee e inner join payroll p on e.emp_id = p.payroll_id
+    -> group by (e.gender) order by e.gender;
++--------+------------------+
+| gender | sum(p.basic_pay) |
++--------+------------------+
+| F      |           270000 |
+| M      |           200000 |
++--------+------------------+
+
+2-Retrieve the data for employee payroll
+ select * from employee e join payroll p on e.emp_id = p.payroll_id;
++--------+----------+------------+----------+--------+---------+------------+-----------+------------+-----------+-------------+---------+
+| emp_id | name     | phone      | address  | gender | comp_id | payroll_id | basic_pay | income_tax | deduction | taxable_pay | net_pay |
++--------+----------+------------+----------+--------+---------+------------+-----------+------------+-----------+-------------+---------+
+|      1 | john doe | 9878988878 | address1 | M      |       1 |          1 |    100000 |          0 |         0 |           0 |       0 |
+|      2 | jane doe | 1231231231 | address2 | F      |       1 |          2 |    120000 |          0 |         0 |           0 |       0 |
+|      3 | Terissa  | 9878998789 | address  | F      |       1 |          3 |    150000 |          0 |         0 |           0 |       0 |
+|      4 | Taylor   | 7678767676 | address  | M      |       1 |          4 |    100000 |          0 |         0 |           0 |       0 |
++--------+----------+------------+----------+--------+---------+------------+-----------+------------+-----------+-------------+---------+
+
+3- Retireve salary by name
+mysql> select e.name, p.basic_pay from employee e inner join payroll p
+    -> on e.emp_id = p.payroll_id
+    -> where e.name = 'Taylor';
++--------+-----------+
+| name   | basic_pay |
++--------+-----------+
+| Taylor |    100000 |
++--------+-----------+
+
+4-salary between date range
+mysql> select e.name,e.start_date, p.basic_pay from employee e inner join payroll p
+    -> on e.emp_id = p.payroll_id
+    -> where e.start_date between CAST('2019-01-01' as DATE) and DATE(NOW());
++----------+------------+-----------+
+| name     | start_date | basic_pay |
++----------+------------+-----------+
+| john doe | 2020-01-10 |    100000 |
+| jane doe | 2020-05-15 |    120000 |
+| Taylor   | 2019-05-01 |    100000 |
++----------+------------+-----------+
+3 rows in set (0.00 sec)
+
+5-Retieve Salary based on departments
+mysql> select * from employee e inner join employee_department ed on e.emp_id = ed.emp_id  inner join payroll p on e.emp_id = p.payroll_id;
++--------+----------+------------+----------+--------+---------+------------+--------+---------+------------+------------+-----------+------------+-----------+-------------+---------+
+| emp_id | name     | phone      | address  | gender | comp_id | start_date | emp_id | dept_id | start_date | payroll_id | basic_pay | income_tax | deduction | taxable_pay | net_pay |
++--------+----------+------------+----------+--------+---------+------------+--------+---------+------------+------------+-----------+------------+-----------+-------------+---------+
+|      1 | john doe | 9878988878 | address1 | M      |       1 | 2020-01-10 |      1 |       1 | 2020-01-10 |          1 |    100000 |          0 |         0 |           0 |       0 |
+|      2 | jane doe | 1231231231 | address2 | F      |       1 | 2020-05-15 |      2 |       1 | 2019-09-10 |          2 |    120000 |          0 |         0 |           0 |       0 |
+|      3 | Terissa  | 9878998789 | address  | F      |       1 | 2018-02-15 |      3 |       1 | 2018-01-10 |          3 |    150000 |          0 |         0 |           0 |       0 |
+|      3 | Terissa  | 9878998789 | address  | F      |       1 | 2018-02-15 |      3 |       2 | 2020-03-10 |          3 |    150000 |          0 |         0 |           0 |       0 |
+|      4 | Taylor   | 7678767676 | address  | M      |       1 | 2019-05-01 |      4 |       2 | 2020-01-04 |          4 |    100000 |          0 |         0 |           0 |       0 |
++--------+----------+------------+----------+--------+---------+------------+--------+---------+------------+------------+-----------+------------+-----------+-------------+---------+
+5 rows in set (0.00 sec)
