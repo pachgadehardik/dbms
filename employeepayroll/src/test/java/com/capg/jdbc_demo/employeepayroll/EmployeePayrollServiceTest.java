@@ -1,5 +1,6 @@
 package com.capg.jdbc_demo.employeepayroll;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.SQLException;
@@ -23,8 +24,8 @@ public class EmployeePayrollServiceTest {
 
 	@Test
 	public void givenEmployeePayrollInDB_When_RetrievedShouldMAtchEmployeeCount() throws SQLException {
-		EmployeePayrollDBService employeePayrollDBService = new EmployeePayrollDBService();
-		employeePayrollDBService = employeePayrollDBService.getInstance();
+		EmployeePayrollDBService employeePayrollDBService =  EmployeePayrollDBService.getInstance();
+		employeePayrollDBService = employeePayrollDBService;
 		System.out.println(employeePayrollDBService.readData());
 		assertEquals(3, employeePayrollDBService.readData().size());
 	}
@@ -32,10 +33,10 @@ public class EmployeePayrollServiceTest {
 	@Test
 	public void givenNewSalaryForEmployee_WhenUpdated_ShoudlMatchWithDB() throws SQLException {
 		try {
-			EmployeePayrollDBService employeePayrollDBService = new EmployeePayrollDBService();
-			employeePayrollDBService = employeePayrollDBService.getInstance();
+			EmployeePayrollDBService employeePayrollDBService = EmployeePayrollDBService.getInstance();
+//			employeePayrollDBService = employeePayrollDBService.getInstance();
 			List<EmployeePayrollData> employeePayrollData = employeePayrollDBService.readData();
-			employeePayrollDBService.updateEmployeeSalary("Teressa", 500000.00);
+			employeePayrollDBService.updateEmployeeSalary("Teressa", 500000.00,0);
 			assertEquals(500000,employeePayrollData.get(1).getSalary());
 //			boolean result = employeePayrollDBService.checkEmployeePayrollInSyncWithDB("Teressa");
 //			assertTrue(result);
@@ -43,5 +44,21 @@ public class EmployeePayrollServiceTest {
 			throw new CustomMySQLException(e.getMessage(), ExceptionType.NO_DATA_FOUND);
 		}
 	}
+	
+	@Test
+	public void givenNewSalaryForEmployee_WhenUpdatedUsingPreparedStatement_ShoudlMatchWithDB() throws SQLException {
+		try {
+			EmployeePayrollDBService employeePayrollDBService = EmployeePayrollDBService.getInstance();
+			List<EmployeePayrollData> employeePayrollData = employeePayrollDBService.readData();
+			employeePayrollDBService.updateEmployeeSalary("John", 500000.00,1);
+			assertEquals(500000,employeePayrollData.get(0).getSalary());
+//			boolean result = employeePayrollDBService.checkEmployeePayrollInSyncWithDB("John");
+//			assertTrue(result);
+		} catch (SQLException e) {
+			throw new CustomMySQLException(e.getMessage(), ExceptionType.NO_DATA_FOUND);
+		}
+	}
+	
+	
 
 }

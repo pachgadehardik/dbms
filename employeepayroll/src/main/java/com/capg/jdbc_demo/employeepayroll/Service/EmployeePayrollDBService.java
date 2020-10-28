@@ -25,9 +25,9 @@ public class EmployeePayrollDBService {
 	
 	static List<EmployeePayrollData> employeePayrollList;
 
-	public EmployeePayrollDBService() {
+	private EmployeePayrollDBService() {
 	}
-
+//
 	public static EmployeePayrollDBService getInstance() {
 		if (employeePayrollDBService == null)
 			employeePayrollDBService = new EmployeePayrollDBService();
@@ -116,8 +116,8 @@ public class EmployeePayrollDBService {
 		}
 	}
 
-	public void updateEmployeeSalary(String name, double salary) throws SQLException {
-		int result = updateEmployeeData(name, salary);
+	public void updateEmployeeSalary(String name, double salary,int flag) throws SQLException {
+		int result = updateEmployeeData(name, salary,flag);
 		if (result == 0)
 			return;
 		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
@@ -131,11 +131,25 @@ public class EmployeePayrollDBService {
 				.orElse(null);
 	}
 
-	private int updateEmployeeData(String name, double salary) throws SQLException {
-
-		return this.updateEmployeeDataUsingSQLQuery(name, salary);
+	private int updateEmployeeData(String name, double salary,int flag) throws SQLException {
+		if(flag==0)
+			return this.updateEmployeeDataUsingSQLQuery(name, salary);
+		return this.updateEmployeeDataUsingPreparedStatement(name,salary);
 	}
 
+	private int updateEmployeeDataUsingPreparedStatement(String name, double salary) throws SQLException {
+		int result = 0;
+		try(Connection conn = this.getConnection()){
+			String sql = "update temp_payroll_table set salary =? where name = ?";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setDouble(1, salary);
+			stmt.setString(2, name);
+			result = stmt.executeUpdate();
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 	private int updateEmployeeDataUsingSQLQuery(String name, double salary) throws SQLException {
 		try (Connection conn = getConnection()) {
 			String sql = String.format("update temp_payroll_table set salary = %.2f where name = '%s';", salary, name);
